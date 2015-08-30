@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1440876149 source:/home/ubuntu/Documents/Ecoprt/Navigation/main.cpp
+	<iostream>
+	<complex>
+	<deque>
+	<fstream>
+	<string>
+	<sstream>
+	<vector>
+
