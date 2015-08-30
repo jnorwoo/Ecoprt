@@ -5,9 +5,11 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <math.h>       /* pow */
 
 using namespace std;
 #define False 0;
+#define True 1;
 
 std::vector<std::string> &split( std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
@@ -95,7 +97,7 @@ Point accetableRangeBottomstartingPointWorldCoordinate = Point(0, 0);
 Point roverWorldCoordinate = 0;
 Point WayPointWorldCoordinate = 0;
 Point startingPointWorldCoordinate = 0;
-int rover = 0;
+Point rover = 0;
 int waypointAcceptableRange = 3;
 int lineNumber = 1;
 deque<int> waypointQueue ;
@@ -107,20 +109,57 @@ int roverNewHeadingDebounce = False;  // not debouncing
 int roverNewHeadingDebounceTime = 3000;  // find a new heading in 3 seconds
 deque<Point> roverPostions ;
 
-int  startingPoint = 0;
+Point  startingPoint = 0;
+std::string::size_type sz;     // alias of size_t
+float gpsX;
+float gpsY;
+
+
 
 void iniatilze(){
     WayPointWorldCoordinate = Point(200, 200); // set a waypoint at 200 meter 200 meteres
     navigationQueue.push_back(WayPointWorldCoordinate); // add the waypoint to the collection of waypoints
 }
 
-std::string::size_type sz;     // alias of size_t
-float gpsX;
-float gpsY;
+
+float distance(Point point1,Point point2){
+   // # distance formula returns in point
+    return sqrt(pow((point2.x() - point1.x()), 2) + pow((point2.y() - point1.y()), 2));
+}
+int atWayPoint(){
+//    # if distance betwen the way point and the rover is less than 3 feet
+    if (distance(roverWorldCoordinate, WayPointWorldCoordinate) < waypointAcceptableRange * pointPerFoot){
+        if (navigationQueue.size() > 1){
+            startingPoint = navigationQueue.front();
+            navigationQueue.pop_front();
+
+}
+        else{
+            startingPoint = navigationQueue[0];
+            heading.rho = 0;
+        }
+//        if (len(navigationQueue) >= 1):
+//            startingPointWorldCoordinate = startingPoint
+//            WayPointWorldCoordinate = navigationQueue[0]
+//        else:
+//            heading.r = 0  # stop car
+
+        return True
+}
+    else{
+        return False
+}
+
+    //    # if the previous rover position distance to the waypoint is smaller
+      //  # than the current than its go away from the waypoint
+}
+
+
+
 
 void moveRover(){
-//    global wasAtWaypoint, startingPointWorldCoordinate
-//    wasAtWaypoint = atWayPoint()
+// main moving logic
+    wasAtWaypoint = atWayPoint();
 //    Turn()
 //    startingPointWorldCoordinate = copy.copy(roverWorldCoordinate)
 }
