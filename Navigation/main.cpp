@@ -92,9 +92,9 @@ Point accetableRangeBottomWayPointWorldCoordinate = Point(0, 0);
 
 Point accetableRangeTopstartingPointWorldCoordinate = Point(0, 0);
 Point accetableRangeBottomstartingPointWorldCoordinate = Point(0, 0);
-int roverWorldCoordinate = 0;
+Point roverWorldCoordinate = 0;
 Point WayPointWorldCoordinate = 0;
-int startingPointWorldCoordinate = 0;
+Point startingPointWorldCoordinate = 0;
 int rover = 0;
 int waypointAcceptableRange = 3;
 int lineNumber = 1;
@@ -105,7 +105,7 @@ deque<Point> navigationQueue;
 int wasAtWaypoint = False;  // should not start at waypoint
 int roverNewHeadingDebounce = False;  // not debouncing
 int roverNewHeadingDebounceTime = 3000;  // find a new heading in 3 seconds
-deque<int> roverPostions ;
+deque<Point> roverPostions ;
 
 int  startingPoint = 0;
 
@@ -114,6 +114,16 @@ void iniatilze(){
     navigationQueue.push_back(WayPointWorldCoordinate); // add the waypoint to the collection of waypoints
 }
 
+std::string::size_type sz;     // alias of size_t
+float gpsX;
+float gpsY;
+
+void moveRover(){
+//    global wasAtWaypoint, startingPointWorldCoordinate
+//    wasAtWaypoint = atWayPoint()
+//    Turn()
+//    startingPointWorldCoordinate = copy.copy(roverWorldCoordinate)
+}
 
 int main()
 {
@@ -127,38 +137,41 @@ int main()
     {
       cordStr.clear(); // clear the contents of the vector so it doesnt' grow from last line
        split( line, ',', cordStr); // we parse each coordinate of the NED ito a list of strings for each ned
-       for (std::vector<string>::iterator it = cordStr.begin(); it != cordStr.end(); ++it)
-            std::cout << ' ' << *it; // iterate through vector of coordinates and print them
+//       for (std::vector<string>::iterator it = cordStr.begin(); it != cordStr.end(); ++it)
+//            std::cout << ' ' << *it; // iterate through vector of coordinates and print them
         if (lineNumber > 2) // we skip the first two lines because they are errors from piksi
         {
             try // we try to convert the coordinates from strings to floats
             {
-//                gpsX = float(cordStr[1])
-//                gpsY = float(cordStr[0])
+
+                gpsX = std::stof (cordStr[1], &sz);
+                gpsY = std::stof (cordStr[0], &sz);
+                //cout << gpsX << " " << gpsY << "\n";
             }
-                //#print str(gpsX) + " : " + str(gpsY)
             catch(...){ // if we are given errors from piksi we will just go to next line
                // #print "bad coordinates"
                 continue;
             }
         }
         if (lineNumber == 3)
-        {
-        //    startingPointWorldCoordinate = Point(gpsX, gpsY)
+        { //after a points been recored you can mark the starting postion
+            startingPointWorldCoordinate = Point(gpsX, gpsY);
         }
         if (lineNumber == 4)
-        {
-//            roverWorldCoordinate = Point(gpsX, gpsY)
-//            roverPostions.append(copy.copy(roverWorldCoordinate))
-//            roverPostions.append(copy.copy(roverWorldCoordinate))
+        { // next we start tracking two postion in rover postions to determin heading update rovers postion
+            roverWorldCoordinate = Point(gpsX, gpsY);
+            roverPostions.push_back(roverWorldCoordinate);
+            roverPostions.push_back(roverWorldCoordinate);
         }
         if (lineNumber > 4)
-        {
-//            roverWorldCoordinate = Point(gpsX, gpsY)
-//            roverPostions.append(copy.copy(roverWorldCoordinate))
-//            if (len(roverPostions) > 2):
-//                roverPostions.popleft()
-//            moveRover()
+        {// only want two rover postions so trim pop off the oldest postion after two.
+            roverWorldCoordinate = Point(gpsX, gpsY);
+            roverPostions.push_back(roverWorldCoordinate);
+            if (roverPostions.size() > 2)
+            {
+                roverPostions.pop_front();
+            }
+            moveRover();
         }
         lineNumber += 1;
 
