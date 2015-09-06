@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1440964074 source:/home/ubuntu/Documents/Ecoprt/Navigation/main.cpp
+1441555244 source:/home/ubuntu/Documents/Ecoprt/Navigation/main.cpp
 	<iostream>
 	<complex>
 	<deque>
@@ -7,4 +7,5 @@
 	<string>
 	<sstream>
 	<vector>
+	<math.h>
 

@@ -122,13 +122,13 @@ void iniatilze(){
 }
 
 
-float distance(Point point1,Point point2){
+float distanceFunc(Point point1,Point point2){
    // # distance formula returns in point
     return sqrt(pow((point2.x() - point1.x()), 2) + pow((point2.y() - point1.y()), 2));
 }
 int atWayPoint(){
 //    # if distance betwen the way point and the rover is less than 3 feet
-    if (distance(roverWorldCoordinate, WayPointWorldCoordinate) < waypointAcceptableRange * pointPerFoot){
+    if (distanceFunc(roverWorldCoordinate, WayPointWorldCoordinate) < waypointAcceptableRange * pointPerFoot){
         if (navigationQueue.size() > 1){
             startingPoint = navigationQueue.front();
             navigationQueue.pop_front();
@@ -136,7 +136,7 @@ int atWayPoint(){
 }
         else{
             startingPoint = navigationQueue[0];
-            heading.rho = 0;
+            heading = polar(0,0);
         }
 //        if (len(navigationQueue) >= 1):
 //            startingPointWorldCoordinate = startingPoint
@@ -154,13 +154,83 @@ int atWayPoint(){
       //  # than the current than its go away from the waypoint
 }
 
+float slope(Point a, Point b){
+//    # y1 - y2 / x2 - x1
+//    # console.log((a.y - b.y)/(a.x - b.x))
+    try{
+        return (a.y() - b.y()) / (a.x() - b.x());
+    }
+    catch(...){
+//        return float('inf')  # math.inf #"Error" a.y  / a.x
+        }
+    return 0.0;
+}
 
+int rotateToParrallel(){
+    float m1 = slope(roverPostions[0], WayPointWorldCoordinate);// slope of the wapoint and the current postion
+    float m2 = slope(roverPostions[0], roverPostions[1]); // slope of the rovers heading.
+    float bearing;
+    try{
+        if ( !isinf(m2) && !isinf(m1)){ // make sure that the slopes are not infinite
+            if (roverPostions[0].x() < roverPostions[1].x()){
+                bearing = atan2(m2, 1);
+                }
+            else{
+                bearing = atan2(m2, 1) + M_PI;
+                }
+//            heading.theta = normalizeAngle(bearingToUnits(bearing))
+//            #print str(heading.theta)
+//            tanTheta = (m2 - m1) / (1 + m1 * m2)
+//            if (not math.isinf(tanTheta)):
+//                theta = math.atan2(tanTheta, 1)
+//                if (not math.isinf(theta)):
+//                    if (theta):
+//                        return theta
+//                    else:
+//                        return 0
+//                else:
+//                    return 0
+            }
+//        else:
+//            return 0
+        }
+    catch(...){
+//        #print "Unexpected error:", sys.exc_info()[0]
+        return 0;  // print "error"
+    }
+    return 0;
+    }
 
+void Turn(){
+        try{
+            turningAngle = 1 * abs(rotateToParrallel());
+        }
+        catch(...)
+        {
+        }
+//        if (startingPointWorldCoordinate.x < WayPointWorldCoordinate.x):
+//            if (aboveLine(startingPointWorldCoordinate, WayPointWorldCoordinate)):
+//                heading.theta += turningAngle
+//                print  "d"
+//
+//
+//            else:
+//                heading.theta -= turningAngle
+//                print  "a"
+//        else:
+//            if (aboveLine(startingPointWorldCoordinate, WayPointWorldCoordinate)):
+//                heading.theta -= turningAngle
+//                print  "a"
+//
+//            else:
+//                heading.theta += turningAngle
+//                print  "d"
 
+}
 void moveRover(){
 // main moving logic
     wasAtWaypoint = atWayPoint();
-//    Turn()
+    Turn();
 //    startingPointWorldCoordinate = copy.copy(roverWorldCoordinate)
 }
 
