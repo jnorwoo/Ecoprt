@@ -87,7 +87,7 @@ int newroverLatlng = 0;
 int dx = 1 * pointPerFoot;
 int dy = 0;
 int roverSpeed = 3 * pointPerFoot;
-complex<int> heading = polar(0, 0);
+complex<double> heading = polar(0.0, 0.0);
 int turningAngle = .07854 * 2;  // turn 90 degrees in 5 seconds if updating at intervals of 2hz
 Point accetableRangeTopWayPointWorldCoordinate = Point(0, 0);
 Point accetableRangeBottomWayPointWorldCoordinate = Point(0, 0);
@@ -111,8 +111,8 @@ deque<Point> roverPostions ;
 
 Point  startingPoint = 0;
 std::string::size_type sz;     // alias of size_t
-float gpsX;
-float gpsY;
+double gpsX;
+double gpsY;
 
 
 
@@ -122,7 +122,7 @@ void iniatilze(){
 }
 
 
-float distanceFunc(Point point1,Point point2){
+double distanceFunc(Point point1,Point point2){
    // # distance formula returns in point
     return sqrt(pow((point2.x() - point1.x()), 2) + pow((point2.y() - point1.y()), 2));
 }
@@ -154,31 +154,47 @@ int atWayPoint(){
       //  # than the current than its go away from the waypoint
 }
 
-float slope(Point a, Point b){
+double slope(Point a, Point b){
 //    # y1 - y2 / x2 - x1
 //    # console.log((a.y - b.y)/(a.x - b.x))
     try{
         return (a.y() - b.y()) / (a.x() - b.x());
     }
     catch(...){
-//        return float('inf')  # math.inf #"Error" a.y  / a.x
+//        return double('inf')  # math.inf #"Error" a.y  / a.x
         }
     return 0.0;
 }
 
+
+double normalizeAngle(double angle){ // angle between 0 and 2pi
+    return fmod((angle + (2 * M_PI)) , (2 * M_PI)); // fmod for modulus with doubles
+}
+
+double flipHorizontally(double angle){
+    double n = floor(angle / (M_PI));
+    return normalizeAngle((M_PI) - fmod(angle , (M_PI)) + n * (M_PI));
+}
+
+double rotateLeft(double angle){ // rotate angle 90 degrees counter clockwise
+    return normalizeAngle(angle + (M_PI / 2));
+}
+double bearingToUnits(double bearing){
+    return flipHorizontally(rotateLeft(bearing));
+}
 int rotateToParrallel(){
-    float m1 = slope(roverPostions[0], WayPointWorldCoordinate);// slope of the wapoint and the current postion
-    float m2 = slope(roverPostions[0], roverPostions[1]); // slope of the rovers heading.
-    float bearing;
+    double m1 = slope(roverPostions[0], WayPointWorldCoordinate);// slope of the wapoint and the current postion
+    double m2 = slope(roverPostions[0], roverPostions[1]); // slope of the rovers heading.
+    double bearing;
     try{
-        if ( !isinf(m2) && !isinf(m1)){ // make sure that the slopes are not infinite
+        if ( !isinf((float)m2) && !isinf((float)m1)){ // make sure that the slopes are not infinite
             if (roverPostions[0].x() < roverPostions[1].x()){
                 bearing = atan2(m2, 1);
                 }
             else{
                 bearing = atan2(m2, 1) + M_PI;
                 }
-//            heading.theta = normalizeAngle(bearingToUnits(bearing))
+              heading = polar(fabs(heading),normalizeAngle(bearingToUnits(bearing)));
 //            #print str(heading.theta)
 //            tanTheta = (m2 - m1) / (1 + m1 * m2)
 //            if (not math.isinf(tanTheta)):
