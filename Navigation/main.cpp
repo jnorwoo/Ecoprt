@@ -138,16 +138,19 @@ int atWayPoint(){
             startingPoint = navigationQueue[0];
             heading = polar(0,0);
         }
-//        if (len(navigationQueue) >= 1):
-//            startingPointWorldCoordinate = startingPoint
-//            WayPointWorldCoordinate = navigationQueue[0]
-//        else:
-//            heading.r = 0  # stop car
+        if (navigationQueue.size()  >= 1){
+            startingPointWorldCoordinate = startingPoint;
+            WayPointWorldCoordinate = navigationQueue[0];
+        }
+        else{
+            //heading.r = 0  # stop car
+            heading = polar(0.0,arg(heading));
 
-        return True
+        }
+        return True;
 }
     else{
-        return False
+        return False;
 }
 
     //    # if the previous rover position distance to the waypoint is smaller
@@ -156,12 +159,11 @@ int atWayPoint(){
 
 double slope(Point a, Point b){
 //    # y1 - y2 / x2 - x1
-//    # console.log((a.y - b.y)/(a.x - b.x))
     try{
         return (a.y() - b.y()) / (a.x() - b.x());
     }
     catch(...){
-//        return double('inf')  # math.inf #"Error" a.y  / a.x
+        return double('inf'); // # math.inf #"Error" a.y  / a.x
         }
     return 0.0;
 }
@@ -186,6 +188,7 @@ int rotateToParrallel(){
     double m1 = slope(roverPostions[0], WayPointWorldCoordinate);// slope of the wapoint and the current postion
     double m2 = slope(roverPostions[0], roverPostions[1]); // slope of the rovers heading.
     double bearing;
+    double tanTheta;
     try{
         if ( !isinf((float)m2) && !isinf((float)m1)){ // make sure that the slopes are not infinite
             if (roverPostions[0].x() < roverPostions[1].x()){
@@ -195,27 +198,42 @@ int rotateToParrallel(){
                 bearing = atan2(m2, 1) + M_PI;
                 }
               heading = polar(fabs(heading),normalizeAngle(bearingToUnits(bearing)));
-//            #print str(heading.theta)
-//            tanTheta = (m2 - m1) / (1 + m1 * m2)
-//            if (not math.isinf(tanTheta)):
-//                theta = math.atan2(tanTheta, 1)
-//                if (not math.isinf(theta)):
-//                    if (theta):
-//                        return theta
-//                    else:
-//                        return 0
-//                else:
-//                    return 0
+            tanTheta = (m2 - m1) / (1 + m1 * m2);
+            if (!isinf((float)tanTheta)){
+                float theta = atan2(tanTheta, 1);
+                if (!isinf((float)theta)){
+                    if (theta){
+                        return theta;
+                    }
+                    else{
+                        return 0;
+                    }
+                 }
+                else{
+                    return 0;
+                }
             }
-//        else:
-//            return 0
+          }
+        else{
+            return 0;
+        }
         }
     catch(...){
-//        #print "Unexpected error:", sys.exc_info()[0]
         return 0;  // print "error"
     }
     return 0;
     }
+
+double  intercept(Point point,double m){
+    return point.y() - (m * point.x());
+    }
+
+bool aboveLine(Point a, Point b){
+    double m = slope(a, b);
+    double bx = intercept(b, m);
+    double y = m * roverWorldCoordinate.x() + bx;
+    return y < roverWorldCoordinate.y();
+}
 
 void Turn(){
         try{
@@ -224,30 +242,33 @@ void Turn(){
         catch(...)
         {
         }
-//        if (startingPointWorldCoordinate.x < WayPointWorldCoordinate.x):
-//            if (aboveLine(startingPointWorldCoordinate, WayPointWorldCoordinate)):
-//                heading.theta += turningAngle
-//                print  "d"
-//
-//
-//            else:
-//                heading.theta -= turningAngle
-//                print  "a"
-//        else:
-//            if (aboveLine(startingPointWorldCoordinate, WayPointWorldCoordinate)):
-//                heading.theta -= turningAngle
-//                print  "a"
-//
-//            else:
-//                heading.theta += turningAngle
-//                print  "d"
+        if (startingPointWorldCoordinate.x() < WayPointWorldCoordinate.x()){
+            if (aboveLine(startingPointWorldCoordinate, WayPointWorldCoordinate)){
+                heading = polar(fabs(heading),arg(heading) +turningAngle);
+                cout << "d\n";
+}
+            else{
 
+                heading = polar(fabs(heading),arg(heading) -turningAngle);
+                cout << "a\n";
+                }
+}
+        else{
+            if (aboveLine(startingPointWorldCoordinate, WayPointWorldCoordinate)){
+                heading = polar(fabs(heading),arg(heading) -turningAngle);
+                cout << "a\n";
+            }
+            else{
+                heading = polar(fabs(heading),arg(heading) +turningAngle);
+                cout << "d\n";
+            }
+        }
 }
 void moveRover(){
 // main moving logic
     wasAtWaypoint = atWayPoint();
     Turn();
-//    startingPointWorldCoordinate = copy.copy(roverWorldCoordinate)
+    startingPointWorldCoordinate = roverWorldCoordinate;
 }
 
 int main()
@@ -262,19 +283,15 @@ int main()
     {
       cordStr.clear(); // clear the contents of the vector so it doesnt' grow from last line
        split( line, ',', cordStr); // we parse each coordinate of the NED ito a list of strings for each ned
-//       for (std::vector<string>::iterator it = cordStr.begin(); it != cordStr.end(); ++it)
-//            std::cout << ' ' << *it; // iterate through vector of coordinates and print them
-        if (lineNumber > 2) // we skip the first two lines because they are errors from piksi
+      if (lineNumber > 2) // we skip the first two lines because they are errors from piksi
         {
             try // we try to convert the coordinates from strings to floats
             {
 
                 gpsX = std::stof (cordStr[1], &sz);
                 gpsY = std::stof (cordStr[0], &sz);
-                //cout << gpsX << " " << gpsY << "\n";
             }
             catch(...){ // if we are given errors from piksi we will just go to next line
-               // #print "bad coordinates"
                 continue;
             }
         }
