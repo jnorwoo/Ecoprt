@@ -88,7 +88,7 @@ int dx = 1 * pointPerFoot;
 int dy = 0;
 int roverSpeed = 3 * pointPerFoot;
 complex<double> heading = polar(0.0, 0.0);
-int turningAngle = .07854 * 2;  // turn 90 degrees in 5 seconds if updating at intervals of 2hz
+double turningAngle = .07854 * 2;  // turn 90 degrees in 5 seconds if updating at intervals of 2hz
 Point accetableRangeTopWayPointWorldCoordinate = Point(0, 0);
 Point accetableRangeBottomWayPointWorldCoordinate = Point(0, 0);
 
@@ -117,7 +117,10 @@ double gpsY;
 
 
 void iniatilze(){
-    WayPointWorldCoordinate = Point(200, 200); // set a waypoint at 200 meter 200 meteres
+    WayPointWorldCoordinate = Point(5,  1); // set a waypoint at 200 meter 200 meteres
+//    WayPointWorldCoordinate = Point(1,  5); // set a waypoint at 200 meter 200 meteres
+//    WayPointWorldCoordinate = Point(-5,  -1); // set a waypoint at 200 meter 200 meteres
+//    WayPointWorldCoordinate = Point(-1,  -5); // set a waypoint at 200 meter 200 meteres
     navigationQueue.push_back(WayPointWorldCoordinate); // add the waypoint to the collection of waypoints
 }
 
@@ -184,14 +187,14 @@ double rotateLeft(double angle){ // rotate angle 90 degrees counter clockwise
 double bearingToUnits(double bearing){
     return flipHorizontally(rotateLeft(bearing));
 }
-int rotateToParrallel(){
+double rotateToParrallel(){
     double m1 = slope(roverPostions[0], WayPointWorldCoordinate);// slope of the wapoint and the current postion
     double m2 = slope(roverPostions[0], roverPostions[1]); // slope of the rovers heading.
     double bearing;
     double tanTheta;
     try{
         if ( !isinf((float)m2) && !isinf((float)m1)){ // make sure that the slopes are not infinite
-            if (roverPostions[0].x() < roverPostions[1].x()){
+            if (roverPostions[0].x() < roverPostions[1].x()){ // rover is facing to the right
                 bearing = atan2(m2, 1);
                 }
             else{
@@ -237,7 +240,8 @@ bool aboveLine(Point a, Point b){
 
 void Turn(){
         try{
-            turningAngle = 1 * abs(rotateToParrallel());
+            turningAngle = 1 * fabs(rotateToParrallel());
+
         }
         catch(...)
         {
